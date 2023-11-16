@@ -5,7 +5,9 @@ A quick and dirty Python script to ask GPT-3 for a prompt and print the response
 """
 
 import os
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 import argparse
 
 SYSTEM_MESSAGE = """
@@ -36,19 +38,16 @@ def main():
 
 
 def ask_gpt(prompt: str, chat_history: list, system_message: str):
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
     user_prompt = {"role": "user", "content": prompt}
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": system_message},
-            *chat_history,
-            user_prompt,
-        ],
-    )
-
-    content = response["choices"][0]["message"]["content"]
+    response = client.chat.completions.create(model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": system_message},
+        *chat_history,
+        user_prompt,
+    ])
+    content = response.choices[0].message.content
     chat_history.append(user_prompt)
     chat_history.append({"role": "assistant", "content": content})
 
